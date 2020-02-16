@@ -8,7 +8,7 @@ import net.minecraft.world.gen.feature.structure.IStructurePieceType;
 
 public class SMPPieceRegistry {
 
-	public static final IStructurePieceType SDUNGEON = register("sdungeon", DungeonPiece::new);
+	public static final IStructurePieceType SDUNGEON = register("dungeon", DungeonPiece::new);
 
 	private static IStructurePieceType register(String key, IStructurePieceType type) {
 		return Registry.register(Registry.STRUCTURE_PIECE, new ResourceLocation(SMPMod.MODID, key), type);

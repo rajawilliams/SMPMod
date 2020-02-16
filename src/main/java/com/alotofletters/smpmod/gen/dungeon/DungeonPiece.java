@@ -16,6 +16,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.gen.feature.structure.StructurePiece;
 import net.minecraft.world.gen.feature.structure.TemplateStructurePiece;
 import net.minecraft.world.gen.feature.template.BlockIgnoreStructureProcessor;
@@ -41,21 +42,33 @@ public class DungeonPiece extends TemplateStructurePiece {
 	 * End rotation of template.
 	 */
 	private final Rotation rotation;
-
+	private final DungeonBiome biome;
 	private Template template;
+	private ChunkGenerator<?> chunkGenerator;
+
+	/**
+	 * Constructor that defaults to plains.
+	 * @param templateManager TemplateManager for loading in the template.
+	 * @param templatePosition Position of the template to load.
+	 * @param rotation Rotation of the template to load.
+	 */
+	public DungeonPiece(TemplateManager templateManager, BlockPos templatePosition, Rotation rotation) {
+		this(templateManager, templatePosition, rotation, DungeonBiome.PLAINS);
+	}
 
 	/**
 	 * Constructor for the structure to simplify stuff.
 	 * @param templateManager TemplateManager for loading in the template.
-	 * @param templateName Name of the template to load.
 	 * @param templatePosition Position of the template to load.
 	 * @param rotation Rotation of the template to load.
+	 * @param biome Biome of the template to load.
 	 */
-	public DungeonPiece(TemplateManager templateManager, String templateName, BlockPos templatePosition, Rotation rotation) {
+	public DungeonPiece(TemplateManager templateManager, BlockPos templatePosition, Rotation rotation, DungeonBiome biome) {
 		super(SMPPieceRegistry.SDUNGEON, 0);
 		this.templatePosition = templatePosition;
-		this.templateName = templateName;
+		this.templateName = biome.location.getPath();
 		this.rotation = rotation;
+		this.biome = biome;
 		this.loadTemplate(templateManager);
 	}
 
@@ -68,6 +81,7 @@ public class DungeonPiece extends TemplateStructurePiece {
 		super(SMPPieceRegistry.SDUNGEON, compoundNBT);
 		this.templateName = compoundNBT.getString("Template");
 		this.rotation = Rotation.valueOf(compoundNBT.getString("Rotation"));
+		this.biome = DungeonBiome.fromLocation(compoundNBT.getString("Biome"));
 		this.loadTemplate(templateManager);
 	}
 
@@ -80,6 +94,7 @@ public class DungeonPiece extends TemplateStructurePiece {
 		super.readAdditional(tagCompound);
 		tagCompound.putString("Template", this.templateName);
 		tagCompound.putString("Rotation", this.placeSettings.getRotation().name()); // TODO: why not this.rotation.name()?
+		tagCompound.putString("Biome", this.biome.toString());
 	}
 
 	/**
@@ -112,20 +127,40 @@ public class DungeonPiece extends TemplateStructurePiece {
 				world.setBlockState(blockPos, Blocks.SPAWNER.getDefaultState(), 2);
 				TileEntity tileentity = world.getTileEntity(blockPos);
 				if (tileentity instanceof MobSpawnerTileEntity) {
-					((MobSpawnerTileEntity)tileentity).getSpawnerBaseLogic().setEntityType(this.getRandomDungeonMob(random));
+					((MobSpawnerTileEntity)tileentity).getSpawnerBaseLogic().setEntityType(biome.spawnerFunction.apply(random));
 				} else {
 					SMPMod.LOGGER.error("Failed to fetch mob spawner entity at ({}, {}, {})", blockPos.getX(), blockPos.getY(), blockPos.getZ());
 				}
 				break;
 			case "smpmod:spawner_chest": // the chests near the spawner
 				world.setBlockState(blockPos, Blocks.CAVE_AIR.getDefaultState(), 2);
-				LockableLootTileEntity.setLootTable(world, random, blockpos2, LootTables.CHESTS_SIMPLE_DUNGEON); // TODO: initialize and use custom loot tables
+				LockableLootTileEntity.setLootTable(world, random, blockpos2, biome.spawnerChestLootTableLocation); // TODO: initialize and use custom loot tables
 				break;
 			case "smpmod:chest": // boring chests in the other room
 				world.setBlockState(blockPos, Blocks.CAVE_AIR.getDefaultState(), 2);
-				LockableLootTileEntity.setLootTable(world, random, blockpos2, LootTables.CHESTS_SPAWN_BONUS_CHEST); // TODO: initialize and use custom loot tables
+				LockableLootTileEntity.setLootTable(world, random, blockpos2, biome.chestLootTableLocation); // TODO: initialize and use custom loot tables
+				break;
+			case "smpmod:pole":
+				world.setBlockState(blockPos, biome.poleMaterial.getDefaultState(), 2);
+				if (world.chunkExists((blockPos.getX() >> 4), (blockPos.getZ() >> 4))) {
+					int y = this.chunkGenerator.func_222531_c(blockPos.getX(), blockPos.getZ(), Heightmap.Type.WORLD_SURFACE_WG);
+					for (int i = blockPos.getY(); i < y + 5; i++) {
+						world.setBlockState(bindToBoundingBox(new BlockPos(blockPos.getX(), i, blockPos.getZ()), boundingBox),
+								biome.poleMaterial.getDefaultState(),
+								2);
+					}
+					world.setBlockState(bindToBoundingBox(new BlockPos(blockPos.getX(), y + 5, blockPos.getZ()), boundingBox),
+							biome.poleTopMaterial.getDefaultState(),
+							2);
+				}
 				break;
 		}
+	}
+
+	private BlockPos bindToBoundingBox(BlockPos pos, MutableBoundingBox box) {
+		return new BlockPos(Math.min(box.maxX, Math.max(pos.getX(), box.minX)),
+							Math.min(192, Math.max(pos.getY(), 1)),
+							Math.min(box.maxZ, Math.max(pos.getZ(), box.minZ)));
 	}
 
 	/**
@@ -139,7 +174,13 @@ public class DungeonPiece extends TemplateStructurePiece {
 		return DungeonHooks.getRandomDungeonMob(rand);
 	}
 
-	public void addBlocksToWorld(IWorld worldIn, BlockPos pos, PlacementSettings placementIn) {
-		template.addBlocksToWorld(worldIn, pos, placementIn);
+	private EntityType<?> getRandomDesertDungeonMob(Random rand) {
+		return DesertDungeonHooks.getRandomDungeonMob(rand);
+	}
+
+	@Override
+	public boolean func_225577_a_(IWorld worldIn, ChunkGenerator<?> chunkGenerator, Random randomIn, MutableBoundingBox structureBoundingBoxIn, ChunkPos chunkPosIn) {
+		this.chunkGenerator = chunkGenerator;
+		return super.func_225577_a_(worldIn, chunkGenerator, randomIn, structureBoundingBoxIn, chunkPosIn);
 	}
 }

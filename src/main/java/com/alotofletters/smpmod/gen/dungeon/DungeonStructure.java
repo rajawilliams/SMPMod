@@ -6,15 +6,14 @@ import net.minecraft.util.SharedSeedRandom;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
 import net.minecraft.world.gen.feature.structure.ScatteredStructure;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureStart;
-import net.minecraft.world.gen.feature.template.PlacementSettings;
 import net.minecraft.world.gen.feature.template.TemplateManager;
 
 import java.util.Random;
@@ -124,32 +123,38 @@ public class DungeonStructure extends ScatteredStructure<NoFeatureConfig> {
 			int x = (chunkX << 4) + 2;
 			int z = (chunkZ << 4) + 2;
 
-			Rotation rotation = Rotation.values()[this.rand.nextInt(Rotation.values().length)];
-			int i = 5;
-			int j = 5;
-			if (rotation == Rotation.CLOCKWISE_90) {
-				i = -5;
-			}
-			else if (rotation == Rotation.CLOCKWISE_180) {
-				i = -5;
-				j = -5;
-			}
-			else if (rotation == Rotation.COUNTERCLOCKWISE_90) {
-				j = -5;
-			}
+			Rotation rotation = Rotation.NONE;
 
-			int k = x + 7;
-			int l = z + 7;
 			int i1 = generator.func_222531_c(x, z, Heightmap.Type.WORLD_SURFACE_WG);
-			int j1 = generator.func_222531_c(x, z + j, Heightmap.Type.WORLD_SURFACE_WG);
-			int k1 = generator.func_222531_c(x + i, z, Heightmap.Type.WORLD_SURFACE_WG);
-			int l1 = generator.func_222531_c(x + i, z + j, Heightmap.Type.WORLD_SURFACE_WG);
-
-			int min = Math.min(Math.min(i1, j1), Math.min(k1, l1));
-			int y = min - this.rand.nextInt(min + 12);
+			int y = i1 - this.rand.nextInt(i1 + 12);
 
 			DungeonPiece piece;
-			piece = new DungeonPiece(templateManagerIn, "dungeon_plains", new BlockPos(x, y, z), rotation);
+			if (Biomes.TAIGA.equals(biomeIn)
+					|| Biomes.TAIGA_HILLS.equals(biomeIn)
+					|| Biomes.TAIGA_MOUNTAINS.equals(biomeIn)
+					|| Biomes.GIANT_SPRUCE_TAIGA.equals(biomeIn)
+					|| Biomes.GIANT_SPRUCE_TAIGA_HILLS.equals(biomeIn)
+					|| Biomes.GIANT_TREE_TAIGA.equals(biomeIn)
+					|| Biomes.GIANT_TREE_TAIGA_HILLS.equals(biomeIn)
+					|| Biomes.MOUNTAINS.equals(biomeIn)
+					|| Biomes.MOUNTAIN_EDGE.equals(biomeIn)
+					|| Biomes.GRAVELLY_MOUNTAINS.equals(biomeIn)
+					|| Biomes.MODIFIED_GRAVELLY_MOUNTAINS.equals(biomeIn)) {
+				piece = new DungeonPiece(templateManagerIn, new BlockPos(x, y, z), rotation, DungeonBiome.SPRUCE_GENERAL);
+			} else if (Biomes.DESERT.equals(biomeIn)
+					|| Biomes.DESERT_HILLS.equals(biomeIn)
+					|| Biomes.BEACH.equals(biomeIn)
+					|| Biomes.SAVANNA.equals(biomeIn)
+					|| Biomes.SAVANNA_PLATEAU.equals(biomeIn)
+					|| Biomes.SHATTERED_SAVANNA.equals(biomeIn)
+					|| Biomes.SHATTERED_SAVANNA_PLATEAU.equals(biomeIn)) {
+				piece = new DungeonPiece(templateManagerIn, new BlockPos(x, y, z), rotation, DungeonBiome.DESERT);
+			} else if (Biomes.FLOWER_FOREST.equals(biomeIn)
+					|| Biomes.SUNFLOWER_PLAINS.equals(biomeIn)) {
+				piece = new DungeonPiece(templateManagerIn, new BlockPos(x, y, z), rotation, DungeonBiome.FLOWER);
+			} else {
+				piece = new DungeonPiece(templateManagerIn, new BlockPos(x, y, z), rotation, DungeonBiome.PLAINS);
+			}
 
 			this.components.add(piece); // add to components list
 			this.recalculateStructureSize(); // recalculate structure size
