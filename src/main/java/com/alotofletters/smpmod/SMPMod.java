@@ -2,10 +2,12 @@ package com.alotofletters.smpmod;
 
 import com.alotofletters.smpmod.init.SMPBlocks;
 import com.alotofletters.smpmod.init.SMPItems;
+import com.alotofletters.smpmod.init.gen.SMPFeatureRegistry;
 import net.minecraft.entity.EntityType;
 import net.minecraftforge.common.DungeonHooks;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,10 +54,16 @@ public class SMPMod {
      * @see SMPMod#SMPMod()
      */
     private void initialize(IEventBus eventBus) {
+        eventBus.addListener(this::setup);
+
         SMPBlocks.BLOCKS.register(eventBus);
         LOGGER_REGISTRY.debug("Registered block DeferredRegistry onto EventBus!");
         SMPItems.ITEMS.register(eventBus);
         LOGGER_REGISTRY.debug("Registered item DeferredRegistry onto EventBus!");
         LOGGER.debug("Finished initialization!");
+    }
+
+    private void setup(FMLCommonSetupEvent event) {
+        SMPFeatureRegistry.applyFeatures();
     }
 }

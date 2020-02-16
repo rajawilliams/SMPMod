@@ -12,7 +12,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraft.item.Item.Properties;
 
 /**
- * EventBus subscriber for when the SMPMod#initialize function isn't enough
+ * EventBus subscriber for when the initialize function isn't enough
  */
 @Mod.EventBusSubscriber(modid = SMPMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class SMPEventSubscriber {

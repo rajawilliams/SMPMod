@@ -12,8 +12,10 @@ import net.minecraft.util.Mirror;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.feature.structure.StructurePiece;
 import net.minecraft.world.gen.feature.structure.TemplateStructurePiece;
 import net.minecraft.world.gen.feature.template.BlockIgnoreStructureProcessor;
@@ -26,7 +28,7 @@ import net.minecraftforge.common.DungeonHooks;
 import java.util.Random;
 
 /**
- * I believe "TemplateStructurePiece" means from \data\<modid>\structures.
+ * I believe "TemplateStructurePiece" means from the structures folder in data.
  * Partially confusing though.
  */
 public class DungeonPiece extends TemplateStructurePiece {
@@ -40,11 +42,14 @@ public class DungeonPiece extends TemplateStructurePiece {
 	 */
 	private final Rotation rotation;
 
+	private Template template;
+
 	/**
 	 * Constructor for the structure to simplify stuff.
 	 * @param templateManager TemplateManager for loading in the template.
 	 * @param templateName Name of the template to load.
 	 * @param templatePosition Position of the template to load.
+	 * @param rotation Rotation of the template to load.
 	 */
 	public DungeonPiece(TemplateManager templateManager, String templateName, BlockPos templatePosition, Rotation rotation) {
 		super(SMPPieceRegistry.SDUNGEON, 0);
@@ -57,7 +62,7 @@ public class DungeonPiece extends TemplateStructurePiece {
 	/**
 	 * Get a dungeon piece from NBT.
 	 * @param templateManager TemplateManager to load in the template.
-	 * @param compoundNBT
+	 * @param compoundNBT NBT to load.
 	 */
 	public DungeonPiece(TemplateManager templateManager, CompoundNBT compoundNBT) {
 		super(SMPPieceRegistry.SDUNGEON, compoundNBT);
@@ -82,7 +87,7 @@ public class DungeonPiece extends TemplateStructurePiece {
 	 * @param templateManager Template manaager.
 	 */
 	private void loadTemplate(TemplateManager templateManager) {
-		Template template = templateManager.getTemplateDefaulted(new ResourceLocation(SMPMod.MODID + ":" + this.templateName));
+		template = templateManager.getTemplateDefaulted(new ResourceLocation(SMPMod.MODID + ":" + this.templateName));
 		PlacementSettings placementSettings = (new PlacementSettings())
 				.setIgnoreEntities(true)
 				.setRotation(this.rotation)
@@ -111,12 +116,15 @@ public class DungeonPiece extends TemplateStructurePiece {
 				} else {
 					SMPMod.LOGGER.error("Failed to fetch mob spawner entity at ({}, {}, {})", blockPos.getX(), blockPos.getY(), blockPos.getZ());
 				}
-			case "smpmod:spawnerchest": // the chests near the spawner
-				world.setBlockState(blockpos2, StructurePiece.func_197528_a(world, blockpos2, Blocks.CHEST.getDefaultState()), 2);
+				break;
+			case "smpmod:spawner_chest": // the chests near the spawner
+				world.setBlockState(blockPos, Blocks.CAVE_AIR.getDefaultState(), 2);
 				LockableLootTileEntity.setLootTable(world, random, blockpos2, LootTables.CHESTS_SIMPLE_DUNGEON); // TODO: initialize and use custom loot tables
+				break;
 			case "smpmod:chest": // boring chests in the other room
-				world.setBlockState(blockpos2, StructurePiece.func_197528_a(world, blockpos2, Blocks.CHEST.getDefaultState()), 2);
+				world.setBlockState(blockPos, Blocks.CAVE_AIR.getDefaultState(), 2);
 				LockableLootTileEntity.setLootTable(world, random, blockpos2, LootTables.CHESTS_SPAWN_BONUS_CHEST); // TODO: initialize and use custom loot tables
+				break;
 		}
 	}
 
@@ -129,5 +137,9 @@ public class DungeonPiece extends TemplateStructurePiece {
 	 */
 	private EntityType<?> getRandomDungeonMob(Random rand) {
 		return DungeonHooks.getRandomDungeonMob(rand);
+	}
+
+	public void addBlocksToWorld(IWorld worldIn, BlockPos pos, PlacementSettings placementIn) {
+		template.addBlocksToWorld(worldIn, pos, placementIn);
 	}
 }

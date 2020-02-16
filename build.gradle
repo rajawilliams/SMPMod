@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = new Date().format("yy'w'ww") + new Date().format("E").substring(0,2).toLowerCase()
+version = new Date().format("yy'w'ww'd'") + new Date().format("E").substring(0,2).toLowerCase()
 group = 'com.alotofletters.smpmod' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'smpmod'
 

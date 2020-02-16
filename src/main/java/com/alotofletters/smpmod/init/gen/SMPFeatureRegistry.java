@@ -13,6 +13,7 @@ import net.minecraft.world.gen.placement.Placement;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ObjectHolder;
 
 import static com.alotofletters.smpmod.SMPMod.MODID;
@@ -27,7 +28,7 @@ public class SMPFeatureRegistry {
 	/**
 	 * Dungeon structure feature.
 	 */
-	@ObjectHolder(MODID + ":sdungeon")
+	@ObjectHolder(MODID + ":dungeon")
 	public static Structure<NoFeatureConfig> DUNGEON_FEATURE;
 
 	/**
@@ -36,11 +37,18 @@ public class SMPFeatureRegistry {
 	 */
 	@SubscribeEvent
 	public static void onRegisterFeature(RegistryEvent.Register<Feature<?>> event) {
-		event.getRegistry().register(new DungeonStructure(NoFeatureConfig::deserialize).setRegistryName(MODID + ":sdungeon"));
+		event.getRegistry().register(new DungeonStructure(NoFeatureConfig::deserialize).setRegistryName(MODID + ":dungeon"));
 	}
 
+	/**
+	 * Apply features to terrain.
+	 */
 	public static void applyFeatures() {
-
+		for (Biome biome : ForgeRegistries.BIOMES.getValues()) {
+			if (biome.getCategory() != Biome.Category.NETHER && biome.getCategory() != Biome.Category.THEEND) {
+				addStructure(biome, GenerationStage.Decoration.UNDERGROUND_STRUCTURES, DUNGEON_FEATURE);
+			}
+		}
 	}
 
 	/**
