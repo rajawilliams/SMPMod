@@ -1,8 +1,10 @@
 package com.alotofletters.smpmod.gen.dungeon;
 
+import com.google.common.collect.Lists;
 import com.mojang.datafixers.Dynamic;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.SharedSeedRandom;
+import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MutableBoundingBox;
@@ -15,7 +17,11 @@ import net.minecraft.world.gen.feature.structure.ScatteredStructure;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureStart;
 import net.minecraft.world.gen.feature.template.TemplateManager;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
 
@@ -23,6 +29,8 @@ import java.util.function.Function;
  * Uses templates to use the "data/smpmod/structures/" folder. Insane, right?
  */
 public class DungeonStructure extends ScatteredStructure<NoFeatureConfig> {
+
+	public static final Hashtable<Biome, List<WeightedDungeonBiome>> DUNGEON_BIOME_HASHTABLE = new Hashtable<>();
 
 	/**
 	 * Confusing constructor for a confusing generational algorithm.
@@ -120,46 +128,94 @@ public class DungeonStructure extends ScatteredStructure<NoFeatureConfig> {
 		 */
 		@Override
 		public void init(ChunkGenerator<?> generator, TemplateManager templateManagerIn, int chunkX, int chunkZ, Biome biomeIn) {
+			checkBiomeHashtable();
 			int x = (chunkX << 4) + 2;
 			int z = (chunkZ << 4) + 2;
 
 			Rotation rotation = Rotation.NONE;
 
 			int i1 = generator.func_222531_c(x, z, Heightmap.Type.WORLD_SURFACE_WG);
-			int y = i1 - this.rand.nextInt(i1 + 12);
+			int y = i1 - this.rand.nextInt(i1 + 12) - 10;
 
 			DungeonPiece piece;
-			if (Biomes.TAIGA.equals(biomeIn)
-					|| Biomes.TAIGA_HILLS.equals(biomeIn)
-					|| Biomes.TAIGA_MOUNTAINS.equals(biomeIn)
-					|| Biomes.GIANT_SPRUCE_TAIGA.equals(biomeIn)
-					|| Biomes.GIANT_SPRUCE_TAIGA_HILLS.equals(biomeIn)
-					|| Biomes.GIANT_TREE_TAIGA.equals(biomeIn)
-					|| Biomes.GIANT_TREE_TAIGA_HILLS.equals(biomeIn)
-					|| Biomes.MOUNTAINS.equals(biomeIn)
-					|| Biomes.MOUNTAIN_EDGE.equals(biomeIn)
-					|| Biomes.GRAVELLY_MOUNTAINS.equals(biomeIn)
-					|| Biomes.MODIFIED_GRAVELLY_MOUNTAINS.equals(biomeIn)) {
-				piece = new DungeonPiece(templateManagerIn, new BlockPos(x, y, z), rotation, DungeonBiome.SPRUCE_GENERAL);
-			} else if (Biomes.DESERT.equals(biomeIn)
-					|| Biomes.DESERT_HILLS.equals(biomeIn)
-					|| Biomes.BEACH.equals(biomeIn)
-					|| Biomes.SAVANNA.equals(biomeIn)
-					|| Biomes.SAVANNA_PLATEAU.equals(biomeIn)
-					|| Biomes.SHATTERED_SAVANNA.equals(biomeIn)
-					|| Biomes.SHATTERED_SAVANNA_PLATEAU.equals(biomeIn)) {
-				piece = new DungeonPiece(templateManagerIn, new BlockPos(x, y, z), rotation, DungeonBiome.DESERT);
-			} else if (Biomes.FLOWER_FOREST.equals(biomeIn)
-					|| Biomes.SUNFLOWER_PLAINS.equals(biomeIn)) {
-				piece = new DungeonPiece(templateManagerIn, new BlockPos(x, y, z), rotation, DungeonBiome.FLOWER);
-			} else {
-				piece = new DungeonPiece(templateManagerIn, new BlockPos(x, y, z), rotation, DungeonBiome.PLAINS);
-			}
+			DungeonBiome biome = WeightedRandom.getRandomItem(rand, DUNGEON_BIOME_HASHTABLE.get(biomeIn)).biome;
+			piece = new DungeonPiece(templateManagerIn, new BlockPos(x, y, z), rotation, biome);
 
 			this.components.add(piece); // add to components list
 			this.recalculateStructureSize(); // recalculate structure size
 		}
 	}
 
+	private static void checkBiomeHashtable() {
+		for (Biome biome : ForgeRegistries.BIOMES.getValues()) {
+			if (!DUNGEON_BIOME_HASHTABLE.contains(biome)) {
+				registerBiome(biome, DungeonBiome.PLAINS, 1); // TODO: not default to plains eventually?
+			}
+		}
+	}
+
+	private static void registerBiome(Biome biome, DungeonBiome dungeonBiome, int weight) {
+		if (DUNGEON_BIOME_HASHTABLE.get(biome) != null) {
+			DUNGEON_BIOME_HASHTABLE.get(biome).add(new WeightedDungeonBiome(weight, dungeonBiome));
+		} else {
+			DUNGEON_BIOME_HASHTABLE.put(biome, Lists.newArrayList(new WeightedDungeonBiome(weight, dungeonBiome)));
+		}
+	}
+
+	static {
+		// FLOWER
+		registerBiome(Biomes.FLOWER_FOREST, DungeonBiome.FLOWER,1);
+		registerBiome(Biomes.SUNFLOWER_PLAINS, DungeonBiome.FLOWER,1);
+
+		// DESERT
+		registerBiome(Biomes.DESERT, DungeonBiome.DESERT,2);
+		registerBiome(Biomes.DESERT_HILLS, DungeonBiome.DESERT,2);
+		registerBiome(Biomes.DESERT_LAKES, DungeonBiome.DESERT,2);
+		registerBiome(Biomes.BEACH, DungeonBiome.DESERT,2);
+		registerBiome(Biomes.SAVANNA, DungeonBiome.DESERT,2);
+		registerBiome(Biomes.SAVANNA_PLATEAU, DungeonBiome.DESERT,2);
+		registerBiome(Biomes.SHATTERED_SAVANNA, DungeonBiome.DESERT,2);
+		registerBiome(Biomes.SHATTERED_SAVANNA_PLATEAU, DungeonBiome.DESERT,2);
+
+		// DESERT_SPIDER
+		registerBiome(Biomes.DESERT, DungeonBiome.DESERT_SPIDER,1);
+		registerBiome(Biomes.DESERT_HILLS, DungeonBiome.DESERT_SPIDER,1);
+		registerBiome(Biomes.DESERT_LAKES, DungeonBiome.DESERT_SPIDER,1);
+		registerBiome(Biomes.BEACH, DungeonBiome.DESERT_SPIDER,1);
+		registerBiome(Biomes.SAVANNA, DungeonBiome.DESERT_SPIDER,1);
+		registerBiome(Biomes.SAVANNA_PLATEAU, DungeonBiome.DESERT_SPIDER,1);
+		registerBiome(Biomes.SHATTERED_SAVANNA, DungeonBiome.DESERT_SPIDER,1);
+		registerBiome(Biomes.SHATTERED_SAVANNA_PLATEAU, DungeonBiome.DESERT_SPIDER,1);
+
+		// SPRUCE_GENERAL
+		registerBiome(Biomes.TAIGA, DungeonBiome.SPRUCE_GENERAL,1);
+		registerBiome(Biomes.TAIGA_HILLS, DungeonBiome.SPRUCE_GENERAL,1);
+		registerBiome(Biomes.TAIGA_MOUNTAINS, DungeonBiome.SPRUCE_GENERAL,1);
+		registerBiome(Biomes.GIANT_SPRUCE_TAIGA_HILLS, DungeonBiome.SPRUCE_GENERAL,1);
+		registerBiome(Biomes.GIANT_TREE_TAIGA_HILLS, DungeonBiome.SPRUCE_GENERAL,1);
+		registerBiome(Biomes.SNOWY_TAIGA_HILLS, DungeonBiome.SPRUCE_GENERAL,1);
+		registerBiome(Biomes.SNOWY_TAIGA_MOUNTAINS, DungeonBiome.SPRUCE_GENERAL,1);
+		registerBiome(Biomes.MOUNTAINS, DungeonBiome.SPRUCE_GENERAL,1);
+		registerBiome(Biomes.MOUNTAIN_EDGE, DungeonBiome.SPRUCE_GENERAL,1);
+		registerBiome(Biomes.GRAVELLY_MOUNTAINS, DungeonBiome.SPRUCE_GENERAL,1);
+		registerBiome(Biomes.WOODED_MOUNTAINS, DungeonBiome.SPRUCE_GENERAL,1);
+		registerBiome(Biomes.MODIFIED_GRAVELLY_MOUNTAINS, DungeonBiome.SPRUCE_GENERAL,1);
+	}
+
+	public static class WeightedDungeonBiome extends WeightedRandom.Item {
+
+		public final DungeonBiome biome;
+
+		public WeightedDungeonBiome(int itemWeightIn, DungeonBiome biome) {
+			super(itemWeightIn);
+			this.biome = biome;
+		}
+
+		@Override
+		public boolean equals(Object target)
+		{
+			return target instanceof WeightedDungeonBiome && this.biome.equals(((WeightedDungeonBiome)target).biome);
+		}
+	}
 
 }

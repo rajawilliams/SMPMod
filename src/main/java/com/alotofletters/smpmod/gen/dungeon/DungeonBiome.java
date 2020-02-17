@@ -21,7 +21,10 @@ public enum DungeonBiome {
 	PLAINS(Blocks.COBBLESTONE, Blocks.COBBLESTONE_WALL, r("dungeon_plains")),
 	DESERT(Blocks.SANDSTONE, Blocks.SANDSTONE_WALL, r("dungeon_desert"), DesertDungeonHooks::getRandomDungeonMob),
 	SPRUCE_GENERAL(Blocks.SPRUCE_PLANKS, Blocks.SPRUCE_FENCE, r("dungeon_spruce_general")),
-	FLOWER(Blocks.WHITE_TERRACOTTA, Blocks.WHITE_TERRACOTTA, r("dungeon_flower"), r("chest_flower"));
+	FLOWER(Blocks.WHITE_TERRACOTTA, Blocks.WHITE_TERRACOTTA, r("dungeon_flower"), r("chest_flower")),
+	DESERT_SPIDER(Blocks.SANDSTONE, Blocks.SANDSTONE_WALL, r("dungeon_desert_spider"), random -> {
+		return EntityType.CAVE_SPIDER;
+	});
 
 	public final Block poleMaterial;
 	public final Block poleTopMaterial;
@@ -58,20 +61,15 @@ public enum DungeonBiome {
 	}
 
 	/**
-	 * Dumb hardcoded way of doing this.
+	 * Better non-hardcoded way of doing this.
 	 * @param string ResourceLocation path of the structure.
 	 * @return DungeonBiome according to the path.
 	 */
 	public static DungeonBiome fromLocation(String string) {
-		switch (string) {
-			case "dungeon_plains":
-				return PLAINS;
-			case "dungeon_desert":
-				return DESERT;
-			case "dungeon_spruce_general":
-				return SPRUCE_GENERAL;
-			case "dungeon_flower":
-				return FLOWER;
+		for (DungeonBiome biome : DungeonBiome.values()) {
+			if (biome.location.getPath() == string) {
+				return biome;
+			}
 		}
 		return PLAINS;
 	}
