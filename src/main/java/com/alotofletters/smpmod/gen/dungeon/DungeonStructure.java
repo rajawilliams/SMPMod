@@ -8,9 +8,12 @@ import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MutableBoundingBox;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biomes;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.GenerationStage;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
 import net.minecraft.world.gen.feature.structure.ScatteredStructure;
@@ -19,11 +22,11 @@ import net.minecraft.world.gen.feature.structure.StructureStart;
 import net.minecraft.world.gen.feature.template.TemplateManager;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Random;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Uses templates to use the "data/smpmod/structures/" folder. Insane, right?
@@ -38,36 +41,6 @@ public class DungeonStructure extends ScatteredStructure<NoFeatureConfig> {
 	 */
 	public DungeonStructure(Function<Dynamic<?>, ? extends NoFeatureConfig> function) {
 		super(function);
-	}
-
-	/**
-	 * Get starting position.
-	 * @param chunkGenerator World generation algorithm.
-	 * @param random Random for generation
-	 * @param x start chunk pos x
-	 * @param z start chunk pos y
-	 * @param spacingOffsetsX How spaced, x-wise?
-	 * @param spacingOffsetsZ How spaced, y-wise?
-	 * @return Ending chunk position
-	 */
-	@Override
-	protected ChunkPos getStartPositionForPosition(ChunkGenerator<?> chunkGenerator, Random random, int x, int z, int spacingOffsetsX, int spacingOffsetsZ) {
-		random.setSeed(this.getSeedModifier());
-		final int distance = 20;
-		final int separation = this.getSize() + 3;
-		int x1 = x + distance * spacingOffsetsX;
-		int z1 = z + distance * spacingOffsetsZ;
-		int x2 = x1 < 0 ? x1 - distance + 1 : x1;
-		int z2 = z1 < 0 ? z1 - distance + 1 : z1;
-		int x3 = x2 / distance;
-		int z3 = z2 / distance;
-		((SharedSeedRandom) random).setLargeFeatureSeedWithSalt(chunkGenerator.getSeed(), x3, z3, this.getSeedModifier());
-		x3 = x3 * distance;
-		z3 = z3 * distance;
-		x3 = x3 + random.nextInt(distance - separation);
-		z3 = z3 + random.nextInt(distance - separation);
-
-		return new ChunkPos(x3, z3);
 	}
 
 	/**
@@ -97,7 +70,7 @@ public class DungeonStructure extends ScatteredStructure<NoFeatureConfig> {
 	 */
 	@Override
 	public String getStructureName() {
-		return "Improved_Dungeon";
+		return "smpmod:Improved_Dungeon";
 	}
 
 	/**
@@ -124,23 +97,18 @@ public class DungeonStructure extends ScatteredStructure<NoFeatureConfig> {
 		 * @param templateManagerIn TemplateManager to get the actual templates.
 		 * @param chunkX Chunk-relative x position.
 		 * @param chunkZ Chunk-relative z position
-		 * @param biomeIn The biome the structure is being generated in.
+		 * @param biomeIn The biome the structure is being generated in.im
 		 */
 		@Override
 		public void init(ChunkGenerator<?> generator, TemplateManager templateManagerIn, int chunkX, int chunkZ, Biome biomeIn) {
 			checkBiomeHashtable();
 			int x = (chunkX << 4) + 2;
 			int z = (chunkZ << 4) + 2;
-
-			Rotation rotation = Rotation.NONE;
-
 			int i1 = generator.func_222531_c(x, z, Heightmap.Type.WORLD_SURFACE_WG);
-			int y = i1 - this.rand.nextInt(i1 + 12) - 10;
-
+			int y = i1 - this.rand.nextInt(i1 + 24) - 10;
 			DungeonPiece piece;
 			DungeonBiome biome = WeightedRandom.getRandomItem(rand, DUNGEON_BIOME_HASHTABLE.get(biomeIn)).biome;
-			piece = new DungeonPiece(templateManagerIn, new BlockPos(x, y, z), rotation, biome);
-
+			piece = new DungeonPiece(templateManagerIn, new BlockPos(x, y, z), Rotation.NONE, biome);
 			this.components.add(piece); // add to components list
 			this.recalculateStructureSize(); // recalculate structure size
 		}
@@ -148,7 +116,7 @@ public class DungeonStructure extends ScatteredStructure<NoFeatureConfig> {
 
 	private static void checkBiomeHashtable() {
 		for (Biome biome : ForgeRegistries.BIOMES.getValues()) {
-			if (!DUNGEON_BIOME_HASHTABLE.contains(biome)) {
+			if (!DUNGEON_BIOME_HASHTABLE.containsKey(biome)) {
 				registerBiome(biome, DungeonBiome.PLAINS, 1); // TODO: not default to plains eventually?
 			}
 		}

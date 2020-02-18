@@ -18,11 +18,11 @@ import static com.alotofletters.smpmod.SMPMod.MODID;
  */
 public enum DungeonBiome {
 
-	PLAINS(Blocks.COBBLESTONE, Blocks.COBBLESTONE_WALL, r("dungeon_plains")),
-	DESERT(Blocks.SANDSTONE, Blocks.SANDSTONE_WALL, r("dungeon_desert"), DesertDungeonHooks::getRandomDungeonMob),
-	SPRUCE_GENERAL(Blocks.SPRUCE_PLANKS, Blocks.SPRUCE_FENCE, r("dungeon_spruce_general")),
-	FLOWER(Blocks.WHITE_TERRACOTTA, Blocks.WHITE_TERRACOTTA, r("dungeon_flower"), r("chest_flower")),
-	DESERT_SPIDER(Blocks.SANDSTONE, Blocks.SANDSTONE_WALL, r("dungeon_desert_spider"), random -> {
+	PLAINS(Blocks.COBBLESTONE, Blocks.COBBLESTONE_WALL, r("dungeon/dungeon_plains")),
+	DESERT(Blocks.SANDSTONE, Blocks.SANDSTONE_WALL, r("dungeon/dungeon_desert"), DesertDungeonHooks::getRandomDungeonMob),
+	SPRUCE_GENERAL(Blocks.SPRUCE_PLANKS, Blocks.SPRUCE_FENCE, r("dungeon/dungeon_spruce_general")),
+	FLOWER(Blocks.WHITE_TERRACOTTA, Blocks.WHITE_TERRACOTTA, r("dungeon/dungeon_flower"), r("chest_flower")),
+	DESERT_SPIDER(Blocks.SANDSTONE, Blocks.SANDSTONE_WALL, r("dungeon/dungeon_desert_spider"), random -> {
 		return EntityType.CAVE_SPIDER;
 	});
 

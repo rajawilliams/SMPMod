@@ -66,7 +66,7 @@ public class DungeonPiece extends TemplateStructurePiece {
 	 * @param biome Biome of the template to load.
 	 */
 	public DungeonPiece(TemplateManager templateManager, BlockPos templatePosition, Rotation rotation, DungeonBiome biome) {
-		super(SMPPieceRegistry.SDUNGEON, 0);
+		super(SMPPieceRegistry.DUNGEON, 0);
 		this.templatePosition = templatePosition;
 		this.templateName = biome.location.getPath();
 		this.rotation = rotation;
@@ -80,7 +80,7 @@ public class DungeonPiece extends TemplateStructurePiece {
 	 * @param compoundNBT NBT to load.
 	 */
 	public DungeonPiece(TemplateManager templateManager, CompoundNBT compoundNBT) {
-		super(SMPPieceRegistry.SDUNGEON, compoundNBT);
+		super(SMPPieceRegistry.DUNGEON, compoundNBT);
 		this.templateName = compoundNBT.getString("Template");
 		this.rotation = Rotation.valueOf(compoundNBT.getString("Rotation"));
 		this.biome = DungeonBiome.fromLocation(compoundNBT.getString("Biome"));
@@ -107,8 +107,6 @@ public class DungeonPiece extends TemplateStructurePiece {
 		template = templateManager.getTemplateDefaulted(new ResourceLocation(SMPMod.MODID + ":" + this.templateName));
 		PlacementSettings placementSettings = (new PlacementSettings())
 				.setIgnoreEntities(true)
-				.setRotation(this.rotation)
-				.setMirror(Mirror.NONE)
 				.addProcessor(BlockIgnoreStructureProcessor.STRUCTURE_BLOCK);
 		this.setup(template, this.templatePosition, placementSettings);
 	}
@@ -144,17 +142,17 @@ public class DungeonPiece extends TemplateStructurePiece {
 				break;
 			case "smpmod:pole":
 				world.setBlockState(blockPos, biome.poleMaterial.getDefaultState(), 2);
-				if (world.chunkExists((blockPos.getX() >> 4), (blockPos.getZ() >> 4))) {
-					int y = this.chunkGenerator.func_222531_c(blockPos.getX(), blockPos.getZ(), Heightmap.Type.WORLD_SURFACE_WG);
-					for (int i = blockPos.getY(); i < y + 5; i++) {
-						world.setBlockState(bindToBoundingBox(new BlockPos(blockPos.getX(), i, blockPos.getZ()), boundingBox),
-								biome.poleMaterial.getDefaultState(),
-								2);
-					}
-					world.setBlockState(bindToBoundingBox(new BlockPos(blockPos.getX(), y + 5, blockPos.getZ()), boundingBox),
-							biome.poleTopMaterial.getDefaultState(),
-							2);
-				}
+//				if (world.chunkExists((blockPos.getX() >> 4), (blockPos.getZ() >> 4))) {
+//					int y = this.chunkGenerator.func_222531_c(blockPos.getX(), blockPos.getZ(), Heightmap.Type.WORLD_SURFACE_WG);
+//					for (int i = blockPos.getY(); i < y + 5; i++) {
+//						world.setBlockState(bindToBoundingBox(new BlockPos(blockPos.getX(), i, blockPos.getZ()), boundingBox),
+//								biome.poleMaterial.getDefaultState(),
+//								2);
+//					}
+//					world.setBlockState(bindToBoundingBox(new BlockPos(blockPos.getX(), y + 5, blockPos.getZ()), boundingBox),
+//							biome.poleTopMaterial.getDefaultState(),
+//							2);
+//				}
 				break;
 		}
 	}
