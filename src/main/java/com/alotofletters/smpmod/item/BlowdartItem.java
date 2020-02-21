@@ -31,7 +31,6 @@ public class BlowdartItem extends Item {
 		ITEM_HASHTABLE.put(potion, this);
 	}
 
-	@OnlyIn(Dist.CLIENT)
 	@Override
 	public ItemStack getDefaultInstance() {
 		return PotionUtils.addPotionToItemStack(super.getDefaultInstance(), this.potion);

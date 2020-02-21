@@ -155,7 +155,7 @@ public class BlowdartEntity extends AbstractArrowEntity {
 				&& (!BlowdartItem.ITEM_HASHTABLE.containsKey(this.potion))) {
 			return new ItemStack(BlowdartItem.EMPTY);
 		} else {
-			return BlowdartItem.ITEM_HASHTABLE.get(this.potion).getDefaultInstance();
+			return PotionUtils.addPotionToItemStack(new ItemStack(BlowdartItem.ITEM_HASHTABLE.get(this.potion)), this.potion);
 		}
 	}
 
