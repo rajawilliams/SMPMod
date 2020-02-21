@@ -4,15 +4,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * Unused Tophat model. Eventually might come to use.
- * @deprecated
  */
 @OnlyIn(Dist.CLIENT)
-public class Tophat extends BipedModel {
+public class Tophat extends BipedModel<PlayerEntity> {
     public ModelRenderer tophat_cap;
     public ModelRenderer tophat_top;
 

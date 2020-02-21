@@ -1,0 +1,40 @@
+{
+  "parent": "smpmod:recipes/root",
+  "rewards": {
+    "recipes": [
+      "smpmod:cooked_mutton",
+      "smpmod:cooked_mutton_smoker"
+    ]
+  },
+  "criteria": {
+    "has_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "smpmod:compressed_sheep"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "smpmod:cooked_mutton"
+      }
+    },
+    "has_the_recipe_smoker": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "smpmod:cooked_mutton_smoker"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_item",
+      "has_the_recipe",
+      "has_the_recipe_smoker"
+    ]
+  ]
+}

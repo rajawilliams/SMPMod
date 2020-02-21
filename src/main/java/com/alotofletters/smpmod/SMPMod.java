@@ -1,12 +1,14 @@
 package com.alotofletters.smpmod;
 
+import com.alotofletters.smpmod.client.ClientSideRegistrySMP;
+import com.alotofletters.smpmod.entity.EntityTypesSMP;
 import com.alotofletters.smpmod.init.SMPBlocks;
+import com.alotofletters.smpmod.init.SMPEnchantments;
 import com.alotofletters.smpmod.init.SMPItems;
 import com.alotofletters.smpmod.init.gen.SMPFeatureRegistry;
-import net.minecraft.entity.EntityType;
-import net.minecraftforge.common.DungeonHooks;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
@@ -55,15 +57,26 @@ public class SMPMod {
 	 */
 	private void initialize(IEventBus eventBus) {
 		eventBus.addListener(this::setup);
+		eventBus.addListener(this::clientLoad);
 
 		SMPBlocks.BLOCKS.register(eventBus);
 		LOGGER_REGISTRY.debug("Registered block DeferredRegistry onto EventBus!");
 		SMPItems.ITEMS.register(eventBus);
 		LOGGER_REGISTRY.debug("Registered item DeferredRegistry onto EventBus!");
+		EntityTypesSMP.ENTITIES.register(eventBus);
+		LOGGER_REGISTRY.debug("Registered entity DeferredRegistry onto EventBus!");
+		SMPEnchantments.ENCHANTMENTS.register(eventBus);
+		LOGGER_REGISTRY.debug("Registered enchantment DeferredRegistry onto EventBus!");
 		LOGGER.debug("Finished initialization!");
 	}
 
 	private void setup(FMLCommonSetupEvent event) {
 		SMPFeatureRegistry.applyFeatures();
 	}
+
+	private void clientLoad(FMLClientSetupEvent event) {
+		ClientSideRegistrySMP.registerEntityRenders();
+	}
+
+
 }

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+
+  "pattern":
+  [
+    "SSS",
+    "SIS",
+    "SSS"
+  ],
+
+  "key":
+  {
+    "I": { "item": "minecraft:white_wool" },
+    "S": { "item": "minecraft:mutton" }
+  },
+
+  "result": { "item": "smpmod:compressed_sheep" }
+}

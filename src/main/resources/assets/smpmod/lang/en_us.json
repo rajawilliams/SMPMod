@@ -1,3 +1,17 @@
 {
-  "block.smpmod.compressed_db1": "Compressed Diamond Block"
+  "block.smpmod.compressed_sheep": "Compressed Sheep Block",
+
+  "item.smpmod.dart": "Dart",
+  "item.smpmod.spider_dart": "Poisonous Dart",
+  "item.smpmod.neurotoxin_dart": "Neurotoxic Dart",
+  "item.smpmod.bamboo_blowgun": "Bamboo Blowgun",
+  "item.smpmod.cane_blowgun": "Blowgun",
+  "item.smpmod.iron_blowgun": "Iron Blowgun",
+  "item.smpmod.spider_tusk": "Spider Tusk",
+
+  "enchantment.smpmod.prospect": "Prospecting",
+
+  "itemGroup.smp_items": "SMPMod Items",
+  "itemGroup.smp_blocks": "SMPMod Blocks",
+  "itemGroup.smp_weapons": "SMPMod Weapons"
 }

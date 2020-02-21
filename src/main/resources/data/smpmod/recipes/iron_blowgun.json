@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+
+  "pattern":
+  [
+    " S ",
+    "SIS",
+    " S "
+  ],
+
+  "key":
+  {
+    "I": { "item": "smpmod:bamboo_blowgun" },
+    "S": { "item": "minecraft:iron_ingot" }
+  },
+
+  "result": { "item": "smpmod:iron_blowgun" }
+}

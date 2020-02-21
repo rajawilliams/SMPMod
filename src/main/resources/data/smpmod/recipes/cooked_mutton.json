@@ -1,0 +1,6 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": { "item": "smpmod:compressed_sheep" },
+  "result": "minecraft:cooked_mutton",
+  "experience": 0.3
+}

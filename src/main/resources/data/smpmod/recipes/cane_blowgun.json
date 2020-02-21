@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+
+  "pattern":
+  [
+    "SIS",
+    "SIS",
+    "SIS"
+  ],
+
+  "key":
+  {
+    "I": { "item": "minecraft:sugar_cane" },
+    "S": { "item": "minecraft:stick" }
+  },
+
+  "result": { "item": "smpmod:cane_blowgun" }
+}

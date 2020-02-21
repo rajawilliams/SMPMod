@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+
+  "ingredients":
+  [
+    { "item": "smpmod:dart" },
+    { "item": "smpmod:spider_tusk" }
+  ],
+
+  "result": { "item": "smpmod:spider_dart" }
+}

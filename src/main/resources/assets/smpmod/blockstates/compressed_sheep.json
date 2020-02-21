@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "": [
+      {"model":  "smpmod:block/compressed_sheep"},
+      {"model":  "smpmod:block/compressed_sheep", "x":  90},
+      {"model":  "smpmod:block/compressed_sheep", "x":  180},
+      {"model":  "smpmod:block/compressed_sheep", "x":  270},
+      {"model":  "smpmod:block/compressed_sheep", "x":  90, "y":  90},
+      {"model":  "smpmod:block/compressed_sheep", "x":  180, "y":  180},
+      {"model":  "smpmod:block/compressed_sheep", "x":  270, "y":  270}
+    ]
+  }
+}

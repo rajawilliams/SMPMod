@@ -16,6 +16,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ObjectHolder;
 
+import java.util.List;
+
 import static com.alotofletters.smpmod.SMPMod.MODID;
 
 /**
@@ -40,8 +42,9 @@ public class SMPFeatureRegistry {
 	 */
 	@SubscribeEvent
 	public static void onRegisterFeature(RegistryEvent.Register<Feature<?>> event) {
-		event.getRegistry().register(new DungeonStructure(NoFeatureConfig::deserialize).setRegistryName(MODID + ":dungeon"));
-		event.getRegistry().register(new FakeWellStructure(NoFeatureConfig::deserialize).setRegistryName(MODID + ":fake_well"));
+		event.getRegistry().registerAll(
+				new DungeonStructure(NoFeatureConfig::deserialize).setRegistryName(MODID + ":dungeon"),
+				new FakeWellStructure(NoFeatureConfig::deserialize).setRegistryName(MODID + ":fake_well"));
 	}
 
 	/**
@@ -51,13 +54,25 @@ public class SMPFeatureRegistry {
 		for (Biome biome : ForgeRegistries.BIOMES.getValues()) {
 			if (biome.getCategory() != Biome.Category.NETHER && biome.getCategory() != Biome.Category.THEEND) {
 				addStructure(biome, GenerationStage.Decoration.UNDERGROUND_STRUCTURES, DUNGEON_FEATURE);
-				biome.addFeature(GenerationStage.Decoration.UNDERGROUND_ORES,
+				List<ConfiguredFeature<?, ?>> configuredFeatureList = biome.getFeatures(GenerationStage.Decoration.UNDERGROUND_ORES);
+				for (ConfiguredFeature<?, ?> feature : configuredFeatureList) {
+					if (feature.config instanceof OreFeatureConfig) {
+						OreFeatureConfig oreFeatureConfig = (OreFeatureConfig) feature.config;
+						if (oreFeatureConfig.state.getBlock().equals(Blocks.GOLD_ORE)) {
+							configuredFeatureList.remove(feature.feature);
+						}
+					}
+				}
+			} else if (biome.getCategory() == Biome.Category.NETHER) {
+				biome.addFeature(
+						GenerationStage.Decoration.UNDERGROUND_ORES,
 						Feature.ORE.withConfiguration(
 								new OreFeatureConfig(
-										OreFeatureConfig.FillerBlockType.NATURAL_STONE,
-										Blocks.IRON_ORE.getDefaultState(),
-										25))
-								.func_227228_a_(Placement.COUNT_VERY_BIASED_RANGE.func_227446_a_(new CountRangeConfig(1, 10, 0, 64))));
+										OreFeatureConfig.FillerBlockType.NETHERRACK,
+										Blocks.GOLD_ORE.getDefaultState(),
+										9)).func_227228_a_(
+												Placement.COUNT_RANGE.func_227446_a_(
+														new CountRangeConfig(2, 0, 0, 32))));
 			}
 		}
 		addStructure(Biomes.DESERT, GenerationStage.Decoration.SURFACE_STRUCTURES, FAKE_WELL_FEATURE);
