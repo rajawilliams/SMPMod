@@ -15,6 +15,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Hashtable;
 import java.util.List;
@@ -31,6 +32,7 @@ public class BlowdartItem extends Item {
 		ITEM_HASHTABLE.put(potion, this);
 	}
 
+	@Nonnull
 	@Override
 	public ItemStack getDefaultInstance() {
 		return PotionUtils.addPotionToItemStack(super.getDefaultInstance(), this.potion);
@@ -43,7 +45,7 @@ public class BlowdartItem extends Item {
 	}
 
 	@Override
-	public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
+	public void fillItemGroup(@Nonnull ItemGroup group, @Nonnull NonNullList<ItemStack> items) {
 		if (this.isInGroup(group)) {
 			items.add(getDefaultInstance());
 		}
@@ -57,6 +59,6 @@ public class BlowdartItem extends Item {
 
 	public boolean isInfinite(ItemStack stack, ItemStack bow, net.minecraft.entity.player.PlayerEntity player) {
 		int enchant = EnchantmentHelper.getEnchantmentLevel(net.minecraft.enchantment.Enchantments.INFINITY, bow);
-		return enchant <= 0 ? false : this.getClass() == BlowdartItem.class;
+		return enchant > 0 && this.getClass() == BlowdartItem.class;
 	}
 }
